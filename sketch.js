@@ -40,46 +40,6 @@ function setup() {
   let canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.parent("quiz-container");
  
-  // 初始化選項按鈕
-  createOptionButtons();
- 
-  // 初始化「下一題」按鈕
-  nextButton = createButton("進入下一題");
-  nextButton.style('background-color', '#4f46e5');
-  nextButton.style('color', '#ffffff');
-  nextButton.style('border', 'none');
-  nextButton.style('border-radius', '10px');
-  nextButton.style('font-family', '"Noto Serif TC", serif');
-  nextButton.style('font-weight', '700');
-  nextButton.style('cursor', 'pointer');
-  nextButton.hide();
-  nextButton.mousePressed(goToNextQuestion);
-  nextButton.mouseOver(() => nextButton.style('background-color', '#4338ca'));
-  nextButton.mouseOut(() => nextButton.style('background-color', '#4f46e5'));
-
-  // 初始化「重新測驗」按鈕
-  restartButton = createButton("重新測驗");
-  restartButton.style('background-color', '#4f46e5');
-  restartButton.style('color', '#ffffff');
-  restartButton.style('border', 'none');
-  restartButton.style('border-radius', '12px');
-  restartButton.style('font-family', '"Noto Serif TC", serif');
-  restartButton.style('font-weight', '700');
-  restartButton.style('cursor', 'pointer');
-  restartButton.hide();
-  restartButton.mousePressed(restartQuiz);
-  restartButton.mouseOver(() => restartButton.style('background-color', '#4338ca'));
-  restartButton.mouseOut(() => restartButton.style('background-color', '#4f46e5'));
-
-  updateLayout();
-}
-
-function setup() {
-  let canvasWidth = min(windowWidth - 40, 650);
-  let canvasHeight = min(windowHeight - 120, 520);
-  let canvas = createCanvas(canvasWidth, canvasHeight);
-  canvas.parent("quiz-container");
- 
   // 初始化選項按鈕（先隱藏，等資料載入才顯示）
   createOptionButtons();
  
