@@ -10,8 +10,10 @@ let restartButton;
 let isLoading = true;       
 let errorMessage = "";      // 用來顯示錯誤訊息
 
-// 你的 Google 試算表 CSV 連結
-const sheetCSVUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2PuVttEbQSfrgiEG_A7GgFvVtsN9nG-RcG5p59AnpJla6C-ORQtN2MWpjbPYjVrYaQFMpRCH2T25D/pub?output=csv';function preload() {
+// 你的 Google 試算表 CSV 連結（加上時間戳記防範快取）
+const sheetCSVUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2PuVttEbQSfrgiEG_A7GgFvVtsN9nG-RcG5p59AnpJla6C-ORQtN2MWpjbPYjVrYaQFMpRCH2T25D/pub?output=csv&t=' + Date.now();
+
+function preload() {
   // 使用 p5.js 載入表格，並加入詳細的錯誤捕捉
   loadTable(sheetCSVUrl, 'csv', 'header', 
     (table) => {
@@ -39,6 +41,46 @@ function setup() {
   canvas.parent("quiz-container");
  
   // 初始化選項按鈕
+  createOptionButtons();
+ 
+  // 初始化「下一題」按鈕
+  nextButton = createButton("進入下一題");
+  nextButton.style('background-color', '#4f46e5');
+  nextButton.style('color', '#ffffff');
+  nextButton.style('border', 'none');
+  nextButton.style('border-radius', '10px');
+  nextButton.style('font-family', '"Noto Serif TC", serif');
+  nextButton.style('font-weight', '700');
+  nextButton.style('cursor', 'pointer');
+  nextButton.hide();
+  nextButton.mousePressed(goToNextQuestion);
+  nextButton.mouseOver(() => nextButton.style('background-color', '#4338ca'));
+  nextButton.mouseOut(() => nextButton.style('background-color', '#4f46e5'));
+
+  // 初始化「重新測驗」按鈕
+  restartButton = createButton("重新測驗");
+  restartButton.style('background-color', '#4f46e5');
+  restartButton.style('color', '#ffffff');
+  restartButton.style('border', 'none');
+  restartButton.style('border-radius', '12px');
+  restartButton.style('font-family', '"Noto Serif TC", serif');
+  restartButton.style('font-weight', '700');
+  restartButton.style('cursor', 'pointer');
+  restartButton.hide();
+  restartButton.mousePressed(restartQuiz);
+  restartButton.mouseOver(() => restartButton.style('background-color', '#4338ca'));
+  restartButton.mouseOut(() => restartButton.style('background-color', '#4f46e5'));
+
+  updateLayout();
+}
+
+function setup() {
+  let canvasWidth = min(windowWidth - 40, 650);
+  let canvasHeight = min(windowHeight - 120, 520);
+  let canvas = createCanvas(canvasWidth, canvasHeight);
+  canvas.parent("quiz-container");
+ 
+  // 初始化選項按鈕（先隱藏，等資料載入才顯示）
   createOptionButtons();
  
   // 初始化「下一題」按鈕
@@ -108,7 +150,7 @@ function initQuiz() {
 
   if (quizQuestions.length > 0) {
     resetOptionButtonStyles();
-    updateButtonText(0);
+    updateButtonText(0); // 確保一開始就載入並顯示第一題按鈕文字
   }
 }
 
@@ -121,6 +163,10 @@ function draw() {
     textSize(18);
     textAlign(CENTER, CENTER);
     text("正在從 Google 試算表載入題庫...", width / 2, height / 2);
+    // 載入中隱藏所有按鈕
+    for (let btn of optionButtons) {
+      btn.hide();
+    }
     return;
   }
 
@@ -129,6 +175,9 @@ function draw() {
     textSize(16);
     textAlign(CENTER, CENTER);
     text(errorMessage, width / 2, height / 2);
+    for (let btn of optionButtons) {
+      btn.hide();
+    }
     return;
   }
 
@@ -210,6 +259,7 @@ function createOptionButtons() {
     btn.style('font-weight', '600');
     btn.style('cursor', 'pointer');
     btn.style('text-align', 'left');
+    btn.hide(); // 預設先隱藏，等資料載入完成才顯示
    
     let index = i;
     btn.mousePressed(() => handleAnswer(index));
@@ -230,7 +280,7 @@ function updateButtonText(qIndex) {
   let labels = ["A", "B", "C", "D"];
   for (let i = 0; i < optionButtons.length; i++) {
     optionButtons[i].html(`${labels[i]}: ${q.options[i]}`);
-    optionButtons[i].show();
+    optionButtons[i].show(); // 確保文字更新後顯示按鈕
   }
 }
 
@@ -264,7 +314,7 @@ function updateLayout() {
 
   let nBtnWidth = isMobile ? canvasWidth - 48 : 200;
   let nBtnHeight = isMobile ? 44 : 48;
- nextButton.size(nBtnWidth, nBtnHeight);
+  nextButton.size(nBtnWidth, nBtnHeight);
   nextButton.position(canvasX + 24, canvasY + canvasHeight - 65);
   nextButton.style('font-size', isMobile ? '15px' : '16px');
 
@@ -293,7 +343,7 @@ function handleAnswer(choice) {
     optionButtons[choice].style('border', '2px solid #4ade80');
   } else {
     optionButtons[choice].style('background-color', '#991b1b');
-    optionButtons[choice].style('border', '2px solid #f87171');
+    optionButtons[ioffset = choice].style('border', '2px solid #f87171'); // 修正語法
    
     optionButtons[q.correct].style('background-color', '#166534');
     optionButtons[q.correct].style('border', '2px solid #4ade80');
