@@ -347,3 +347,6 @@ function restartQuiz() {
       isLoading = false;
       errorMessage = "重新載入 Google 試算表失敗！";
       console.
+   }
+  );
+}
