@@ -10,11 +10,10 @@ let restartButton;
 let isLoading = true;       
 let errorMessage = "";      // 用來顯示錯誤訊息
 
-// 你的 Google 試算表 CSV 連結（加上時間戳記防範快取）
+// 你的 Google 試算表 CSV 連結（加上時間戳記防快取）
 const sheetCSVUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2PuVttEbQSfrgiEG_A7GgFvVtsN9nG-RcG5p59AnpJla6C-ORQtN2MWpjbPYjVrYaQFMpRCH2T25D/pub?output=csv&t=' + Date.now();
 
 function preload() {
-  // 使用 p5.js 載入表格，並加入詳細的錯誤捕捉
   loadTable(sheetCSVUrl, 'csv', 'header', 
     (table) => {
       allQuestions = table;
@@ -40,7 +39,7 @@ function setup() {
   let canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.parent("quiz-container");
  
-  // 初始化選項按鈕（先隱藏，等資料載入才顯示）
+  // 初始化選項按鈕
   createOptionButtons();
  
   // 初始化「下一題」按鈕
@@ -110,7 +109,7 @@ function initQuiz() {
 
   if (quizQuestions.length > 0) {
     resetOptionButtonStyles();
-    updateButtonText(0); // 確保一開始就載入並顯示第一題按鈕文字
+    updateButtonText(0);
   }
 }
 
@@ -123,7 +122,6 @@ function draw() {
     textSize(18);
     textAlign(CENTER, CENTER);
     text("正在從 Google 試算表載入題庫...", width / 2, height / 2);
-    // 載入中隱藏所有按鈕
     for (let btn of optionButtons) {
       btn.hide();
     }
@@ -131,7 +129,7 @@ function draw() {
   }
 
   if (errorMessage !== "") {
-    fill(248, 113, 113); // 紅色錯誤提示
+    fill(248, 113, 113);
     textSize(16);
     textAlign(CENTER, CENTER);
     text(errorMessage, width / 2, height / 2);
@@ -141,7 +139,15 @@ function draw() {
     return;
   }
 
+  // 確保只要進入題目畫面，且按鈕文字尚未被正確帶入時，強制重新整理按鈕文字
   if (currentQuestion < quizQuestions.length) {
+    // 雙重保險：確保按鈕有顯示且文字不是只有 A:
+    if (quizQuestions.length > 0 && optionButtons.length === 4) {
+      let currentLabelCheck = optionButtons[0].html();
+      if (currentLabelCheck.endsWith(": ") || currentLabelCheck === "") {
+        updateButtonText(currentQuestion);
+      }
+    }
     drawQuizScreen();
     restartButton.hide();
   } else {
@@ -219,7 +225,7 @@ function createOptionButtons() {
     btn.style('font-weight', '600');
     btn.style('cursor', 'pointer');
     btn.style('text-align', 'left');
-    btn.hide(); // 預設先隱藏，等資料載入完成才顯示
+    btn.hide();
    
     let index = i;
     btn.mousePressed(() => handleAnswer(index));
@@ -240,7 +246,7 @@ function updateButtonText(qIndex) {
   let labels = ["A", "B", "C", "D"];
   for (let i = 0; i < optionButtons.length; i++) {
     optionButtons[i].html(`${labels[i]}: ${q.options[i]}`);
-    optionButtons[i].show(); // 確保文字更新後顯示按鈕
+    optionButtons[i].show();
   }
 }
 
@@ -303,7 +309,7 @@ function handleAnswer(choice) {
     optionButtons[choice].style('border', '2px solid #4ade80');
   } else {
     optionButtons[choice].style('background-color', '#991b1b');
-    optionButtons[ioffset = choice].style('border', '2px solid #f87171'); // 修正語法
+    optionButtons[choice].style('border', '2px solid #f87171');
    
     optionButtons[q.correct].style('background-color', '#166534');
     optionButtons[q.correct].style('border', '2px solid #4ade80');
@@ -340,7 +346,4 @@ function restartQuiz() {
     (err) => {
       isLoading = false;
       errorMessage = "重新載入 Google 試算表失敗！";
-      console.error("重新載入失敗：", err);
-    }
-  );
-}
+      console.
